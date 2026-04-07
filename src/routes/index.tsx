@@ -1,18 +1,20 @@
+import { useState } from "react";
 import { createFileRoute, Link } from '@tanstack/react-router'
-import { INITIAL_BOARDS } from "@/data/boards";
+import { loadBoards } from "@/data/board-storage";
 import {
   Card,
   CardDescription,
   CardHeader,
   CardTitle
 } from "@/components/ui/card";
+import { useBoards } from "@/hooks/use-boards";
 
 export const Route = createFileRoute('/')({
   component: HomePage,
 })
 
 function HomePage() {
-  const boards = INITIAL_BOARDS;
+  const { boards } = useBoards();
 
   return (
     <div>

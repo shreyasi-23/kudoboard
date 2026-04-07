@@ -1,11 +1,8 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { INITIAL_BOARDS } from "@/data/boards";
 import type { Kudo } from "@/data/types";
-import { Card, CardContent } from "@/components/ui/card";
-import { useReducer } from "react";
 import AddKudoForm from "@/components/add-kudo-form";
 import KudoCard from "@/components/kudo-card";
-import { kudosReducer } from "@/reducers/kudos";
+import { useBoards } from "@/hooks/use-boards";
 
 export const Route = createFileRoute('/boards/$boardId')({
   component: BoardPage,
@@ -13,9 +10,9 @@ export const Route = createFileRoute('/boards/$boardId')({
 
 function BoardPage() {
   const { boardId } = Route.useParams();
-  const board = INITIAL_BOARDS.find((b) => b.id === boardId);
-
-  const [kudos, dispatch] = useReducer(kudosReducer, board?.kudos ?? []);
+  const { boards, addKudo, deleteKudo } = useBoards();
+  
+  const board = boards.find((b) => b.id === boardId);
 
   if (!board) {
     return (
@@ -28,12 +25,12 @@ function BoardPage() {
     );
   }
 
-  function handleAddKudo(kudo: Kudo) {
-    dispatch({ type: "added", kudo });
+  const handleAddKudo = (kudo: Kudo) => {
+    addKudo(board.id, kudo);
   }
 
-  function handleDeleteKudo(id: string) {
-    dispatch({ type: "deleted", id });
+  const handleDeleteKudo = (kudoId: string) => {
+    deleteKudo(board.id, kudoId);
   }
 
   return (
@@ -41,13 +38,14 @@ function BoardPage() {
       <h1 className="mb-2 text-3xl font-bold">{board.title}</h1>
       <p className="mb-6 text-muted-foreground">{board.description}</p>
       <AddKudoForm onAdd={handleAddKudo} />
-      {kudos.length === 0 ? (
+
+      {board.kudos.length === 0 ? (
         <p className="text-muted-foreground">
           No kudos yet. Be the first to add one!
         </p>
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {kudos.map((kudo) => (
+          {board.kudos.map((kudo) => (
             <KudoCard
               key={kudo.id}
               kudo={kudo}
